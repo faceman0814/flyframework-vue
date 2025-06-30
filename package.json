@@ -1,9 +1,10 @@
 {
-  "name": "pure-admin-thin",
+  "name": "flyframework-vue",
   "version": "6.0.0",
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "NODE_OPTIONS=--max-old-space-size=4096 vite",
     "dev": "NODE_OPTIONS=--max-old-space-size=4096 vite",
     "serve": "pnpm dev",
     "build": "rimraf dist && NODE_OPTIONS=--max-old-space-size=8192 vite build",
@@ -43,9 +44,9 @@
   },
   "license": "MIT",
   "author": {
-    "name": "xiaoxian521",
-    "email": "pureadmin@163.com",
-    "url": "https://github.com/xiaoxian521"
+    "name": "faceman",
+    "email": "1002784867@qq.com",
+    "url": "https://github.com/faceman0814"
   },
   "dependencies": {
     "@pureadmin/descriptions": "^1.2.1",
@@ -72,7 +73,9 @@
     "vue-i18n": "^11.1.3",
     "vue-router": "^4.5.0",
     "vue-tippy": "^6.7.0",
-    "vue-types": "^6.0.0"
+    "vue-types": "^6.0.0",
+    "nswag": "^14.1.0",
+    "moment": "^2.30.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
