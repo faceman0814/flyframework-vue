@@ -8,7 +8,6 @@
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
 
-import "rxjs/add/operator/finally";
 import axios, {
   AxiosError,
   AxiosInstance,
@@ -685,6 +684,135 @@ export class UserServiceProxy {
       );
     }
     return Promise.resolve<void>(null as any);
+  }
+
+  /**
+   * 获取用户列表分页数据
+   * @param body (optional)
+   * @return Success
+   */
+  getPaged(
+    body: GetUsersInput | undefined,
+    cancelToken?: CancelToken
+  ): Promise<GetPagedResultApiResponse> {
+    let url_ = this.baseUrl + "/api/User/GetPaged";
+    url_ = url_.replace(/[?&]$/, "");
+
+    const content_ = JSON.stringify(body);
+
+    let options_: AxiosRequestConfig = {
+      data: content_,
+      method: "POST",
+      url: url_,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      cancelToken
+    };
+
+    return this.instance
+      .request(options_)
+      .catch((_error: any) => {
+        if (isAxiosError(_error) && _error.response) {
+          return _error.response;
+        } else {
+          throw _error;
+        }
+      })
+      .then((_response: AxiosResponse) => {
+        return this.processGetPaged(_response);
+      });
+  }
+
+  protected processGetPaged(
+    response: AxiosResponse
+  ): Promise<GetPagedResultApiResponse> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && typeof response.headers === "object") {
+      for (const k in response.headers) {
+        if (response.headers.hasOwnProperty(k)) {
+          _headers[k] = response.headers[k];
+        }
+      }
+    }
+    if (status === 200) {
+      const _responseText = response.data;
+      let result200: any = null;
+      let resultData200 = _responseText;
+      result200 = GetPagedResultApiResponse.fromJS(resultData200);
+      return Promise.resolve<GetPagedResultApiResponse>(result200);
+    } else if (status !== 200 && status !== 204) {
+      const _responseText = response.data;
+      return throwException(
+        "An unexpected server error occurred.",
+        status,
+        _responseText,
+        _headers
+      );
+    }
+    return Promise.resolve<GetPagedResultApiResponse>(null as any);
+  }
+
+  /**
+   * @return Success
+   */
+  getUserColumnList(cancelToken?: CancelToken): Promise<ListApiResponse2> {
+    let url_ = this.baseUrl + "/api/User/GetUserColumnList";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: AxiosRequestConfig = {
+      method: "GET",
+      url: url_,
+      headers: {
+        Accept: "application/json"
+      },
+      cancelToken
+    };
+
+    return this.instance
+      .request(options_)
+      .catch((_error: any) => {
+        if (isAxiosError(_error) && _error.response) {
+          return _error.response;
+        } else {
+          throw _error;
+        }
+      })
+      .then((_response: AxiosResponse) => {
+        return this.processGetUserColumnList(_response);
+      });
+  }
+
+  protected processGetUserColumnList(
+    response: AxiosResponse
+  ): Promise<ListApiResponse2> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && typeof response.headers === "object") {
+      for (const k in response.headers) {
+        if (response.headers.hasOwnProperty(k)) {
+          _headers[k] = response.headers[k];
+        }
+      }
+    }
+    if (status === 200) {
+      const _responseText = response.data;
+      let result200: any = null;
+      let resultData200 = _responseText;
+      result200 = ListApiResponse2.fromJS(resultData200);
+      return Promise.resolve<ListApiResponse2>(result200);
+    } else if (status !== 200 && status !== 204) {
+      const _responseText = response.data;
+      return throwException(
+        "An unexpected server error occurred.",
+        status,
+        _responseText,
+        _headers
+      );
+    }
+    return Promise.resolve<ListApiResponse2>(null as any);
   }
 }
 
@@ -1406,6 +1534,7 @@ export class UserDto implements IUserDto {
   userName: string | undefined;
   phoneNumber: string | undefined;
   isActive: boolean;
+  creationTime: moment.Moment;
 
   constructor(data?: IUserDto) {
     if (data) {
@@ -1426,6 +1555,9 @@ export class UserDto implements IUserDto {
       this.userName = _data["UserName"];
       this.phoneNumber = _data["PhoneNumber"];
       this.isActive = _data["IsActive"];
+      this.creationTime = _data["CreationTime"]
+        ? moment(_data["CreationTime"].toString())
+        : <any>undefined;
     }
   }
 
@@ -1446,6 +1578,9 @@ export class UserDto implements IUserDto {
     data["UserName"] = this.userName;
     data["PhoneNumber"] = this.phoneNumber;
     data["IsActive"] = this.isActive;
+    data["CreationTime"] = this.creationTime
+      ? this.creationTime.toISOString()
+      : <any>undefined;
     return data;
   }
 
@@ -1466,6 +1601,429 @@ export interface IUserDto {
   userName: string | undefined;
   phoneNumber: string | undefined;
   isActive: boolean;
+  creationTime: moment.Moment;
+}
+
+export class ColumnDto implements IColumnDto {
+  /** 字段名称 */
+  label: string | undefined;
+  /** 字段key */
+  prop: string | undefined;
+  /** 指定插槽 */
+  slot: string | undefined;
+
+  constructor(data?: IColumnDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.label = _data["label"];
+      this.prop = _data["prop"];
+      this.slot = _data["slot"];
+    }
+  }
+
+  static fromJS(data: any): ColumnDto {
+    data = typeof data === "object" ? data : {};
+    let result = new ColumnDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["label"] = this.label;
+    data["prop"] = this.prop;
+    data["slot"] = this.slot;
+    return data;
+  }
+
+  clone(): ColumnDto {
+    const json = this.toJSON();
+    let result = new ColumnDto();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IColumnDto {
+  /** 字段名称 */
+  label: string | undefined;
+  /** 字段key */
+  prop: string | undefined;
+  /** 指定插槽 */
+  slot: string | undefined;
+}
+
+export class UserListDto implements IUserListDto {
+  id: string | undefined;
+  name: string | undefined;
+  password: string | undefined;
+  email: string | undefined;
+  fullName: string | undefined;
+  userName: string | undefined;
+  phoneNumber: string | undefined;
+  isActive: boolean;
+  creationTime: moment.Moment;
+
+  constructor(data?: IUserListDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data["Id"];
+      this.name = _data["Name"];
+      this.password = _data["Password"];
+      this.email = _data["Email"];
+      this.fullName = _data["FullName"];
+      this.userName = _data["UserName"];
+      this.phoneNumber = _data["PhoneNumber"];
+      this.isActive = _data["IsActive"];
+      this.creationTime = _data["CreationTime"]
+        ? moment(_data["CreationTime"].toString())
+        : <any>undefined;
+    }
+  }
+
+  static fromJS(data: any): UserListDto {
+    data = typeof data === "object" ? data : {};
+    let result = new UserListDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["Id"] = this.id;
+    data["Name"] = this.name;
+    data["Password"] = this.password;
+    data["Email"] = this.email;
+    data["FullName"] = this.fullName;
+    data["UserName"] = this.userName;
+    data["PhoneNumber"] = this.phoneNumber;
+    data["IsActive"] = this.isActive;
+    data["CreationTime"] = this.creationTime
+      ? this.creationTime.toISOString()
+      : <any>undefined;
+    return data;
+  }
+
+  clone(): UserListDto {
+    const json = this.toJSON();
+    let result = new UserListDto();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IUserListDto {
+  id: string | undefined;
+  name: string | undefined;
+  password: string | undefined;
+  email: string | undefined;
+  fullName: string | undefined;
+  userName: string | undefined;
+  phoneNumber: string | undefined;
+  isActive: boolean;
+  creationTime: moment.Moment;
+}
+
+export class PagedResultDto implements IPagedResultDto {
+  totalCount: number;
+  items: UserListDto[] | undefined;
+
+  constructor(data?: IPagedResultDto) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.totalCount = _data["TotalCount"];
+      if (Array.isArray(_data["Items"])) {
+        this.items = [] as any;
+        for (let item of _data["Items"])
+          this.items.push(UserListDto.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): PagedResultDto {
+    data = typeof data === "object" ? data : {};
+    let result = new PagedResultDto();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["TotalCount"] = this.totalCount;
+    if (Array.isArray(this.items)) {
+      data["Items"] = [];
+      for (let item of this.items)
+        data["Items"].push(item ? item.toJSON() : <any>undefined);
+    }
+    return data;
+  }
+
+  clone(): PagedResultDto {
+    const json = this.toJSON();
+    let result = new PagedResultDto();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IPagedResultDto {
+  totalCount: number;
+  items: UserListDto[] | undefined;
+}
+
+export class GetPagedResult implements IGetPagedResult {
+  columns: ColumnDto[] | undefined;
+  datas: PagedResultDto | undefined;
+
+  constructor(data?: IGetPagedResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["columns"])) {
+        this.columns = [] as any;
+        for (let item of _data["columns"])
+          this.columns.push(ColumnDto.fromJS(item));
+      }
+      this.datas = _data["datas"]
+        ? PagedResultDto.fromJS(_data["datas"])
+        : <any>undefined;
+    }
+  }
+
+  static fromJS(data: any): GetPagedResult {
+    data = typeof data === "object" ? data : {};
+    let result = new GetPagedResult();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.columns)) {
+      data["columns"] = [];
+      for (let item of this.columns)
+        data["columns"].push(item ? item.toJSON() : <any>undefined);
+    }
+    data["datas"] = this.datas ? this.datas.toJSON() : <any>undefined;
+    return data;
+  }
+
+  clone(): GetPagedResult {
+    const json = this.toJSON();
+    let result = new GetPagedResult();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IGetPagedResult {
+  columns: ColumnDto[] | undefined;
+  datas: PagedResultDto | undefined;
+}
+
+export class GetPagedResultApiResponse implements IGetPagedResultApiResponse {
+  data: GetPagedResult | undefined;
+  code: number;
+  success: boolean;
+  message: string | undefined;
+
+  constructor(data?: IGetPagedResultApiResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.data = _data["Data"]
+        ? GetPagedResult.fromJS(_data["Data"])
+        : <any>undefined;
+      this.code = _data["Code"];
+      this.success = _data["Success"];
+      this.message = _data["Message"];
+    }
+  }
+
+  static fromJS(data: any): GetPagedResultApiResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new GetPagedResultApiResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["Data"] = this.data ? this.data.toJSON() : <any>undefined;
+    data["Code"] = this.code;
+    data["Success"] = this.success;
+    data["Message"] = this.message;
+    return data;
+  }
+
+  clone(): GetPagedResultApiResponse {
+    const json = this.toJSON();
+    let result = new GetPagedResultApiResponse();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IGetPagedResultApiResponse {
+  data: GetPagedResult | undefined;
+  code: number;
+  success: boolean;
+  message: string | undefined;
+}
+
+export class GetUsersInput implements IGetUsersInput {
+  filterText: string | undefined;
+  sorting: string | undefined;
+  maxResultCount: number;
+  skipCount: number;
+
+  constructor(data?: IGetUsersInput) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.filterText = _data["FilterText"];
+      this.sorting = _data["Sorting"];
+      this.maxResultCount = _data["MaxResultCount"];
+      this.skipCount = _data["SkipCount"];
+    }
+  }
+
+  static fromJS(data: any): GetUsersInput {
+    data = typeof data === "object" ? data : {};
+    let result = new GetUsersInput();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["FilterText"] = this.filterText;
+    data["Sorting"] = this.sorting;
+    data["MaxResultCount"] = this.maxResultCount;
+    data["SkipCount"] = this.skipCount;
+    return data;
+  }
+
+  clone(): GetUsersInput {
+    const json = this.toJSON();
+    let result = new GetUsersInput();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IGetUsersInput {
+  filterText: string | undefined;
+  sorting: string | undefined;
+  maxResultCount: number;
+  skipCount: number;
+}
+
+export class ListApiResponse2 implements IListApiResponse2 {
+  data: ColumnDto[] | undefined;
+  code: number;
+  success: boolean;
+  message: string | undefined;
+
+  constructor(data?: IListApiResponse2) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["Data"])) {
+        this.data = [] as any;
+        for (let item of _data["Data"]) this.data.push(ColumnDto.fromJS(item));
+      }
+      this.code = _data["Code"];
+      this.success = _data["Success"];
+      this.message = _data["Message"];
+    }
+  }
+
+  static fromJS(data: any): ListApiResponse2 {
+    data = typeof data === "object" ? data : {};
+    let result = new ListApiResponse2();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.data)) {
+      data["Data"] = [];
+      for (let item of this.data)
+        data["Data"].push(item ? item.toJSON() : <any>undefined);
+    }
+    data["Code"] = this.code;
+    data["Success"] = this.success;
+    data["Message"] = this.message;
+    return data;
+  }
+
+  clone(): ListApiResponse2 {
+    const json = this.toJSON();
+    let result = new ListApiResponse2();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface IListApiResponse2 {
+  data: ColumnDto[] | undefined;
+  code: number;
+  success: boolean;
+  message: string | undefined;
 }
 
 export class SwaggerException extends Error {
@@ -1512,3 +2070,5 @@ function throwException(
 function isAxiosError(obj: any): obj is AxiosError {
   return obj && obj.isAxiosError === true;
 }
+
+// import "rxjs/add/operator/finally";
