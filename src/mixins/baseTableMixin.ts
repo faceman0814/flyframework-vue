@@ -20,7 +20,7 @@ export const useBaseTable = (fetchDataCallback: () => Promise<void>) => {
     currentPage: 1,
     pageSizes: [1, 20, 40, 60, 50, 100],
     total: 0,
-    // align: "right",
+    // align: "right1",
     background: true,
     size: "default"
   } as any);
