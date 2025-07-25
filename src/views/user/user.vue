@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { h, onMounted, ref } from "vue";
 import {
   UserServiceProxy,
   GetUsersInput,
@@ -7,7 +7,9 @@ import {
 } from "@/shared/service-proxies/service-proxies";
 import dayjs from "dayjs";
 import { useBaseTable } from "@/mixins/baseTableMixin";
-
+import { $t, transformI18n } from "@/plugins/i18n";
+import { addDialog } from "@/components/ReDialog";
+import userModel from "./userModel.vue";
 const tableData = ref<UserListDto[]>([]);
 const service = new UserServiceProxy();
 
@@ -17,9 +19,7 @@ const fetchData = async () => {
     const input = new GetUsersInput();
     input.skipCount = (pagination.currentPage - 1) * pagination.pageSize;
     input.maxResultCount = pagination.pageSize;
-
     const res = await service.getPaged(input);
-
     if (res.data.columns) {
       columns.value = transformColumns(res.data.columns);
     }
@@ -37,6 +37,21 @@ const { columns, pagination, transformColumns, handlePageChange } =
 onMounted(() => {
   fetchData();
 });
+
+function handleClick(row, name) {
+  addDialog({
+    title: transformI18n($t(name)),
+    //可拖拽
+    draggable: true,
+    //传组件进入模态框
+    contentRenderer: () => userModel,
+    //传递参数
+    props: {
+      // 赋默认值
+      entity: row
+    }
+  });
+}
 </script>
 
 <template>
@@ -46,11 +61,25 @@ onMounted(() => {
       stripe
       border
       showOverflowTooltip
+      :default-sort="{ prop: 'name', order: 'ascending' }"
       :data="tableData"
       :columns="columns"
       :pagination="pagination"
       @page-change="handlePageChange"
     >
+      <template #opertion="{ row }">
+        <el-button
+          link
+          type="primary"
+          size="small"
+          @click="handleClick(row, 'operation.query')"
+        >
+          {{ transformI18n($t("operation.query")) }}
+        </el-button>
+        <el-button link type="primary" size="small">{{
+          transformI18n($t("operation.edit"))
+        }}</el-button>
+      </template>
       <template #email="{ row }">
         <el-tag>{{ row.email }}</el-tag>
       </template>

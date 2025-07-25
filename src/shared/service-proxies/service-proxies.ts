@@ -567,7 +567,7 @@ export class UserServiceProxy {
    * @return Success - No return data
    */
   createUser(
-    body: UserDto | undefined,
+    body: CreateOrUpdateUserParam | undefined,
     cancelToken?: CancelToken
   ): Promise<void> {
     let url_ = this.baseUrl + "/api/User/CreateUser";
@@ -629,7 +629,7 @@ export class UserServiceProxy {
    * @return Success - No return data
    */
   updateUser(
-    body: UserDto | undefined,
+    body: CreateOrUpdateUserParam | undefined,
     cancelToken?: CancelToken
   ): Promise<void> {
     let url_ = this.baseUrl + "/api/User/UpdateUser";
@@ -1604,6 +1604,57 @@ export interface IUserDto {
   creationTime: moment.Moment;
 }
 
+export class CreateOrUpdateUserParam implements ICreateOrUpdateUserParam {
+  id: number | undefined;
+  /** 实体 */
+  entity: UserDto | undefined;
+
+  constructor(data?: ICreateOrUpdateUserParam) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data["id"];
+      this.entity = _data["Entity"]
+        ? UserDto.fromJS(_data["Entity"])
+        : <any>undefined;
+    }
+  }
+
+  static fromJS(data: any): CreateOrUpdateUserParam {
+    data = typeof data === "object" ? data : {};
+    let result = new CreateOrUpdateUserParam();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["id"] = this.id;
+    data["Entity"] = this.entity ? this.entity.toJSON() : <any>undefined;
+    return data;
+  }
+
+  clone(): CreateOrUpdateUserParam {
+    const json = this.toJSON();
+    let result = new CreateOrUpdateUserParam();
+    result.init(json);
+    return result;
+  }
+}
+
+export interface ICreateOrUpdateUserParam {
+  id: number | undefined;
+  /** 实体 */
+  entity: UserDto | undefined;
+}
+
 export class ColumnDto implements IColumnDto {
   /** 字段名称 */
   label: string | undefined;
@@ -1662,6 +1713,8 @@ export interface IColumnDto {
 }
 
 export class UserListDto implements IUserListDto {
+  /** 操作 */
+  opertion: string | undefined;
   id: string | undefined;
   name: string | undefined;
   password: string | undefined;
@@ -1683,6 +1736,7 @@ export class UserListDto implements IUserListDto {
 
   init(_data?: any) {
     if (_data) {
+      this.opertion = _data["Opertion"];
       this.id = _data["Id"];
       this.name = _data["Name"];
       this.password = _data["Password"];
@@ -1706,6 +1760,7 @@ export class UserListDto implements IUserListDto {
 
   toJSON(data?: any) {
     data = typeof data === "object" ? data : {};
+    data["Opertion"] = this.opertion;
     data["Id"] = this.id;
     data["Name"] = this.name;
     data["Password"] = this.password;
@@ -1729,6 +1784,8 @@ export class UserListDto implements IUserListDto {
 }
 
 export interface IUserListDto {
+  /** 操作 */
+  opertion: string | undefined;
   id: string | undefined;
   name: string | undefined;
   password: string | undefined;

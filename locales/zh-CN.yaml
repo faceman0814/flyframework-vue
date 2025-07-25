@@ -93,3 +93,12 @@ user:
   userModule: 用户模块
   userManager: 用户管理
   roleManager: 角色管理
+operation:
+  query: 查看
+  edit: 编辑
+  delete: 删除
+  resetPassword: 重置密码
+  resetPasswordSuccess: 重置密码成功
+  resetPasswordFail: 重置密码失败
+  deleteSuccess: 删除成功
+  deleteFail: 删除失败
