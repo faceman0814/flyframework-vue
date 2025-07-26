@@ -81,7 +81,7 @@ status:
   pureNoNotify: 暂无通知
   pureNoTodo: 暂无待办
 login:
-  pureUsername: 账号
+  pureUsername: 账号s
   purePassword: 密码
   pureLogin: 登录
   pureLoginSuccess: 登录成功
@@ -92,6 +92,15 @@ login:
 user:
   userModule: 用户模块
   userManager: 用户管理
+  userModel:
+    userName: 用户名
+    fullName: 姓名
+    email: 邮箱
+    phoneNumber: 手机号
+    creationTime: 创建时间
+    isActive: 是否启用
+    password: 密码
+    addSuccess: 操作用户成功
   roleManager: 角色管理
 operation:
   query: 查看
@@ -102,3 +111,13 @@ operation:
   resetPasswordFail: 重置密码失败
   deleteSuccess: 删除成功
   deleteFail: 删除失败
+loading:
+  loading: 加载中...
+  loadingFail: 加载失败
+  loadingSuccess: 加载成功
+  loadingNoData: 暂无数据
+  loadingNoMoreData: 没有更多数据了
+  loadingError: 加载错误
+  loadingNetworkError: 网络错误，请稍后再试
+  loadingTimeout: 请求超时，请稍后再试
+placeholder: 请输入
