@@ -3,10 +3,11 @@ import { ref, watch } from "vue";
 import { $t, transformI18n } from "@/plugins/i18n";
 import { useUser } from "./utils/hook";
 import { formRules } from "./utils/rule";
+import { UserDto } from "@/shared/service-proxies/service-proxies";
 // 声明 props 类型
 export interface userFromProps {
-  id?: string | undefined;
-  isAdd?: boolean;
+  isEdit?: boolean;
+  entity: UserDto;
 }
 const ruleFormRef = ref();
 function getRef() {
@@ -14,23 +15,13 @@ function getRef() {
 }
 defineExpose({ getRef });
 
-const { getUserInfo, loading, entity } = useUser();
+const { loading } = useUser();
 
 const props = withDefaults(defineProps<userFromProps>(), {
-  id: "",
-  isAdd: false
+  isEdit: false,
+  entity: null // 默认空对象
 });
-
-// 当props.id变化时重新获取数据
-watch(
-  () => props.id,
-  newId => {
-    if (newId) {
-      getUserInfo(newId);
-    }
-  },
-  { immediate: true }
-);
+const entity = ref(props.entity);
 </script>
 
 <template>
@@ -47,7 +38,7 @@ watch(
           v-model="entity.userName"
           class="w-[220px]!"
           :placeholder="transformI18n($t('placeholder'))"
-          :disabled="!props.isAdd"
+          :disabled="!props.isEdit"
         />
       </el-form-item>
       <el-form-item :label="transformI18n($t('user.userModel.fullName'))">
@@ -55,7 +46,7 @@ watch(
           v-model="entity.fullName"
           class="w-[220px]!"
           :placeholder="transformI18n($t('placeholder'))"
-          :disabled="!props.isAdd"
+          :disabled="!props.isEdit"
         />
       </el-form-item>
       <el-form-item :label="transformI18n($t('user.userModel.email'))">
@@ -63,7 +54,7 @@ watch(
           v-model="entity.email"
           class="w-[220px]!"
           :placeholder="transformI18n($t('placeholder'))"
-          :disabled="!props.isAdd"
+          :disabled="!props.isEdit"
         />
       </el-form-item>
 
@@ -75,7 +66,7 @@ watch(
           v-model="entity.phoneNumber"
           class="w-[220px]!"
           :placeholder="transformI18n($t('placeholder'))"
-          :disabled="!props.isAdd"
+          :disabled="!props.isEdit"
         />
       </el-form-item>
       <el-form-item :label="transformI18n($t('user.userModel.isActive'))">
@@ -83,7 +74,7 @@ watch(
           v-model="entity.isActive"
           :active-value="true"
           :inactive-value="false"
-          :disabled="!props.isAdd"
+          :disabled="!props.isEdit"
         />
       </el-form-item>
     </el-form>

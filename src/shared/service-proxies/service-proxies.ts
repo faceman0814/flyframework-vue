@@ -563,6 +563,7 @@ export class UserServiceProxy {
   }
 
   /**
+   * 创建或更新用户
    * @param body (optional)
    * @return Success - No return data
    */

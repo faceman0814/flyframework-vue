@@ -1,8 +1,9 @@
 import {
   GetUsersInput,
-  type IUserDto,
+  UserDto,
   type UserListDto,
-  UserServiceProxy
+  UserServiceProxy,
+  CreateOrUpdateUserParam
 } from "@/shared/service-proxies/service-proxies";
 import { $t, transformI18n } from "@/plugins/i18n";
 import { addDialog } from "@/components/ReDialog";
@@ -16,10 +17,8 @@ export function useUser(tableRef?: Ref) {
   // type UserModelFormRef = InstanceType<typeof userModel>["getRef"];
 
   let loadingInstance: ReturnType<typeof ElLoading.service>;
-  const entity = ref<IUserDto>();
+  const entity = ref<UserDto>();
   const formRef = ref();
-  // const ruleFormRef = ref();
-  // const ruleFormRef = ref<UserModelFormRef>(); // 明确类型
   const selectedNum = ref(0);
   const loading = ref(false);
   const tableData = ref<UserListDto[]>([]);
@@ -52,7 +51,10 @@ export function useUser(tableRef?: Ref) {
     tableRef.value.getTableRef().clearSelection();
   }
 
-  function openDialog(row, name, opertion) {
+  async function openDialog(row, name, opertion) {
+    if (opertion !== "add") {
+      await getUserInfo(row.id);
+    }
     addDialog({
       title: transformI18n($t(name)),
       //可拖拽
@@ -60,22 +62,26 @@ export function useUser(tableRef?: Ref) {
       //传组件进入模态框
       contentRenderer: () =>
         h(userModel, {
-          ref: formRef
+          ref: formRef,
+          // 传递实体引用
+          entity: entity.value
         }),
       //传递参数
       props: {
-        id: row.id,
-        isAdd: opertion
+        isEdit: opertion === "edit",
+        entity: entity.value
       },
-      popconfirm: opertion ? { title: "是否确认修改当前数据" } : null,
-      beforeSure: done => {
+      popconfirm:
+        opertion !== "query" ? { title: "是否确认修改当前数据" } : null,
+      beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         FormRef.validate(valid => {
           if (valid) {
-            submitForm();
-            done(); // 关闭弹框
-            // onSearch(); // 刷新表格数据
-            // fetchData();
+            submitForm(options.props.entity);
+            // 关闭弹框
+            done();
+            // 刷新表格数据
+            fetchData();
           }
         });
       }
@@ -91,7 +97,9 @@ export function useUser(tableRef?: Ref) {
         background: "rgba(0, 0, 0, 0.7)"
       });
       const user = await service.getUserInfo(id);
-      entity.value = { ...user.data };
+      const userDto = new UserDto();
+      Object.assign(userDto, user.data);
+      entity.value = userDto;
     } catch (error) {
       message("获取用户详情失败:" + error, {
         customClass: "el",
@@ -102,7 +110,7 @@ export function useUser(tableRef?: Ref) {
       loadingInstance?.close();
     }
   }
-  async function submitForm() {
+  async function submitForm(entity: UserDto) {
     try {
       loading.value = true;
       loadingInstance = ElLoading.service({
@@ -110,7 +118,13 @@ export function useUser(tableRef?: Ref) {
         text: transformI18n($t("loading")),
         background: "rgba(0, 0, 0, 0.7)"
       });
+      const param = new CreateOrUpdateUserParam();
+      param.id = entity.id;
+      param.entity = entity;
       debugger;
+      service.createOrUpdateUser(param).then(() => {
+        message("操作成功", { type: "success" });
+      });
     } catch (error) {
       message("操作失败:" + error, { type: "error" });
     } finally {

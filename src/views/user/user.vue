@@ -40,7 +40,7 @@ onMounted(() => {
           link
           type="primary"
           size="small"
-          @click="openDialog(row, 'operation.query', false)"
+          @click="openDialog(row, 'operation.query', 'query')"
         >
           {{ transformI18n($t("operation.query")) }}
         </el-button>
@@ -48,7 +48,7 @@ onMounted(() => {
           link
           type="primary"
           size="small"
-          @click="openDialog(row, 'operation.query', true)"
+          @click="openDialog(row, 'operation.query', 'edit')"
           >{{ transformI18n($t("operation.edit")) }}</el-button
         >
       </template>
